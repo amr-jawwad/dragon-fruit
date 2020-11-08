@@ -28,12 +28,7 @@ mock_orders_data = {'customer_id':
 def is_matching(List1: np.array, List2: np.array):
     if len(List1) != len(List2):
         return False
-    for i in range(len(List1)):
-        if np.isnan(List1[i]) and np.isnan(List2[i]):
-            continue
-        if List1[i] != List2[i]:
-            return False
-    return True
+    return ((List1 == List2) | (np.isnan(List1) & np.isnan(List2))).all()
 
 
 def test_calculate_is_returning_customer_counting_failed():
