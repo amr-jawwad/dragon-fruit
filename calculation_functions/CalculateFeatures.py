@@ -1,6 +1,6 @@
 import pandas as pd
 
-def CalculateTimeToNextOrder(Data: pd.DataFrame, COUNT_FAILED_ORDERS: bool):
+def CalculateTimeBetweenOrders(Data: pd.DataFrame, COUNT_FAILED_ORDERS: bool):
     #I had to also sort by customer_rank, because there were orders that were on the same day, at the same hour
     #So the only information about their true order was in the rank.
 
@@ -20,8 +20,9 @@ def CalculateTimeToNextOrder(Data: pd.DataFrame, COUNT_FAILED_ORDERS: bool):
     else:
         Grouped = Data[Data.is_failed==0].groupby('customer_id').agg({"order_time":"diff"})
 
-    Grouped = Grouped.rename({"order_time":"time_to_next_order"},axis=1)
-    Grouped.time_to_next_order = Grouped.time_to_next_order.shift(-1)
+    Grouped = Grouped.rename({"order_time":"time_since_last_order"},axis=1)
+    Grouped['time_to_next_order'] = Grouped.time_since_last_order.shift(-1)
+    Grouped.time_since_last_order = (Grouped.time_since_last_order.dt.total_seconds())//3600
     Grouped.time_to_next_order = (Grouped.time_to_next_order.dt.total_seconds())//3600
 
     Data = pd.merge(Data,Grouped, left_index=True, right_index=True,how='left')

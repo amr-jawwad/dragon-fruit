@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from calculation_functions.CalculateTimeToNextOrder import CalculateTimeToNextOrder
+from calculation_functions.CalculateFeatures import CalculateTimeBetweenOrders
 
 mock_orders_data = {'customer_id':
                     {0: 'a',
@@ -32,14 +32,14 @@ def is_matching(List1: np.array, List2: np.array):
 
 
 def test_calculate_is_returning_customer_counting_failed():
-    result_df = CalculateTimeToNextOrder(Data= pd.DataFrame(mock_orders_data), COUNT_FAILED_ORDERS= True)
+    result_df = CalculateTimeBetweenOrders(Data= pd.DataFrame(mock_orders_data), COUNT_FAILED_ORDERS= True)
 
     assert (is_matching(result_df.customer_order_rank.to_numpy(),[1, 2, 3, 4, 5, 6])), "Some values in the calculated order rank were incorrect"
     assert (is_matching(result_df.time_to_next_order.to_numpy(),[30.0, 42.0, 21.0, 220.0, 1132.0, np.nan])), "Some values in the day_diff were incorrect"
     #assert (is_matching(result_df.is_returning_customer.to_numpy(),[1, 1, 1, 1, 1, 0])), "Some values in the is_returning_customer were incorrect"
 
 def test_calculate_is_returning_customer_not_counting_failed():
-    result_df = CalculateTimeToNextOrder(Data= pd.DataFrame(mock_orders_data), COUNT_FAILED_ORDERS= False)
+    result_df = CalculateTimeBetweenOrders(Data= pd.DataFrame(mock_orders_data), COUNT_FAILED_ORDERS= False)
 
     assert (is_matching(result_df.time_to_next_order.to_numpy(),[np.nan, 42.0, 241.0, np.nan, 1132.0, np.nan])), "Some values in the day_diff were incorrect"
     #assert (is_matching(result_df.is_returning_customer.to_numpy(),[0, 1, 1, 0, 1, 0])), "Some values in the is_returning_customer were incorrect"
