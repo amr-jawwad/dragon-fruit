@@ -27,7 +27,7 @@ def CalculateTimeBetweenOrders(Data: pd.DataFrame, COUNT_FAILED_ORDERS: bool):
 
     Data = pd.merge(Data,Grouped, left_index=True, right_index=True,how='left')
 
-    # Data['is_returning_customer'] = 0
-    # Data.loc[Data.day_diff<=180,'is_returning_customer'] = 1
+    Data['is_returning_customer'] = 0
+    Data.loc[Data.time_to_next_order<=4320,'is_returning_customer'] = 1 #4320 is the number of hours in 180 days (~6 months)
     
     return Data
