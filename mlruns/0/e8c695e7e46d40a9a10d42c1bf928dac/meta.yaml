@@ -1,0 +1,15 @@
+artifact_uri: ./mlruns/0/e8c695e7e46d40a9a10d42c1bf928dac/artifacts
+end_time: 1605032300452
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: deleted
+name: ''
+run_id: e8c695e7e46d40a9a10d42c1bf928dac
+run_uuid: e8c695e7e46d40a9a10d42c1bf928dac
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1605032290195
+status: 4
+tags: []
+user_id: amrmo

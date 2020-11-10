@@ -2,8 +2,11 @@ import pandas as pd
 import os.path
 import json
 
+import mlflow
+
 from dragon_fruit.machine_learning.feature_engineering import run_data_engineering, enrich_testing_data
 from dragon_fruit.machine_learning.evaluation import classification_evaluation
+from utils import save_classification_report, save_confusion_matrix, save_model
 
 CONFIG_FILE_PATH = 'config.json'
 
@@ -13,7 +16,7 @@ with open(CONFIG_FILE_PATH, 'r') as config_file:
 
 #Files' Paths
 TRAINING_DATA_PATH = config_dict['TRAINING_DATA_PATH']
-ENGINEERED_DATA_PATH = config_dict['ENGINEERED_DATA_PATH']
+ENGINEERED_DATA_PATHS = config_dict['ENGINEERED_DATA_PATHS']
 TESTING_DATA_PATH = config_dict['TESTING_DATA_PATH']
 
 #Logic Config
@@ -34,7 +37,8 @@ early_stopping_rounds = config_dict['early_stopping_rounds']
 INF_TIME_TO_NEXT_ORDER = config_dict['INF_TIME_TO_NEXT_ORDER'] #This will replace NaNs in time-to-next-order for the last orders
 VALIDATION_DATA_SIZE = config_dict['VALIDATION_DATA_SIZE'] #As a fraction of the training data
 
-
+#Determine which engineered data to look for based on the COUNT_FAILED_ORDERS config
+ENGINEERED_DATA_PATH = ENGINEERED_DATA_PATHS["COUNT_FAILED_ON" if COUNT_FAILED_ORDERS else "COUNT_FAILED_OFF"]
 
 #Checking if Engineered data already exists, to skip remaking it.
 if os.path.isfile(ENGINEERED_DATA_PATH):
@@ -87,64 +91,94 @@ Enriched_Test_Data = enrich_testing_data(Training_Data= Engineered_Data,
 
 print("Enriched Testing Data successfully.")
 
-if model_of_selection == 'XGBRegressor':
-    from dragon_fruit.machine_learning.models.XGBRegressor import get_predictions
+MLFLOW_RUN_NAME = model_of_selection + ' ' + ('' if COUNT_FAILED_ORDERS else 'not ') + "counting failed orders"
+with mlflow.start_run(run_name= MLFLOW_RUN_NAME):
 
-    y_pred, y_proba, Feature_Importance, model = get_predictions(Training_Data= Engineered_Data,
-                                                                Testing_Data= Enriched_Test_Data,
-                                                                Feature_Columns= Feature_Columns,
-                                                                target_col= 'time_to_next_order',
-                                                                inf_time_to_next_order= INF_TIME_TO_NEXT_ORDER,
-                                                                split_data= split_data,
-                                                                validation_data_size= VALIDATION_DATA_SIZE,
-                                                                random_seed= random_seed,
-                                                                early_stopping_rounds= early_stopping_rounds)
+    log_dict = config_dict.copy()
+    del log_dict['DEFAULT_MODEL']
+    del log_dict['TRAINING_DATA_PATH']
+    del log_dict['ENGINEERED_DATA_PATHS']
+    del log_dict['TESTING_DATA_PATH']
+    del log_dict['model_of_selection']
+
+    mlflow.log_params(log_dict)
+
+    if model_of_selection == 'XGBRegressor':
+        from dragon_fruit.machine_learning.models.XGBRegressor import get_predictions
+        mlflow.log_param('ML_MODEL', model_of_selection)
+
+        y_pred, y_proba, Feature_Importance, model = get_predictions(Training_Data= Engineered_Data,
+                                                                    Testing_Data= Enriched_Test_Data,
+                                                                    Feature_Columns= Feature_Columns,
+                                                                    target_col= 'time_to_next_order',
+                                                                    inf_time_to_next_order= INF_TIME_TO_NEXT_ORDER,
+                                                                    split_data= split_data,
+                                                                    validation_data_size= VALIDATION_DATA_SIZE,
+                                                                    random_seed= random_seed,
+                                                                    early_stopping_rounds= early_stopping_rounds)
+        
+        Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
+                                                                            y_pred= y_pred)
+
+
+    elif model_of_selection == 'XGBClassifier':
+        from dragon_fruit.machine_learning.models.XGBClassifier import get_predictions
+        mlflow.log_param('ML_MODEL', model_of_selection)
+
+        y_pred, y_proba, Feature_Importance, model = get_predictions(Training_Data= Engineered_Data,
+                                                                    Testing_Data= Enriched_Test_Data,
+                                                                    Feature_Columns= Feature_Columns,
+                                                                    target_col= 'is_returning_customer',
+                                                                    inf_time_to_next_order= INF_TIME_TO_NEXT_ORDER,
+                                                                    split_data= split_data,
+                                                                    validation_data_size= VALIDATION_DATA_SIZE,
+                                                                    random_seed= random_seed,
+                                                                    early_stopping_rounds= early_stopping_rounds)
+        
+        Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
+                                                                            y_pred= y_pred,
+                                                                            y_pred_proba= y_proba)
+
+    else:
+        print("Unrecognised model selection: %s." % model_of_selection)
+        print("Falling back to default model: %s." % DEFAULT_MODEL)
+
+        from dragon_fruit.machine_learning.models.XGBClassifier import get_predictions
+        mlflow.log_param('ML_MODEL', 'XGBClassifier')
+
+        y_pred, y_proba, Feature_Importance, model = get_predictions(Training_Data= Engineered_Data,
+                                                                    Testing_Data= Enriched_Test_Data,
+                                                                    Feature_Columns= Feature_Columns,
+                                                                    target_col= 'is_returning_customer',
+                                                                    inf_time_to_next_order= INF_TIME_TO_NEXT_ORDER,
+                                                                    split_data= split_data,
+                                                                    validation_data_size= VALIDATION_DATA_SIZE,
+                                                                    random_seed= random_seed,
+                                                                    early_stopping_rounds= early_stopping_rounds)
+        
+        Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
+                                                                            y_pred= y_pred,
+                                                                            y_pred_proba= y_proba)
+
+    CONFUSION_MATRIX_PATH = config_dict["CONFUSION_MATRIX_PATH"]
+    CLASSIFICATION_REPORT_PATH = config_dict["CLASSIFICATION_REPORT_PATH"]
+    MODEL_PICKLE_PATH = config_dict["MODEL_PICKLE_PATH"]
     
-    Confusion_Matrix, Classification_Report, _ = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
-                                                                           y_pred= y_pred)
+    save_confusion_matrix(Confusion_Matrix, CONFUSION_MATRIX_PATH)
+    save_classification_report(Classification_Report['String'], CLASSIFICATION_REPORT_PATH)
+    save_model(model, MODEL_PICKLE_PATH)
 
-    # print(Confusion_Matrix)
-    # print(Classification_Report)
+    mlflow.log_artifact(CONFUSION_MATRIX_PATH)
+    mlflow.log_artifact(CLASSIFICATION_REPORT_PATH)
+    mlflow.log_artifact(MODEL_PICKLE_PATH)
 
-
-elif model_of_selection == 'XGBClassifier':
-    from dragon_fruit.machine_learning.models.XGBClassifier import get_predictions
-
-    y_pred, y_proba, Feature_Importance, model = get_predictions(Training_Data= Engineered_Data,
-                                                                Testing_Data= Enriched_Test_Data,
-                                                                Feature_Columns= Feature_Columns,
-                                                                target_col= 'is_returning_customer',
-                                                                inf_time_to_next_order= INF_TIME_TO_NEXT_ORDER,
-                                                                split_data= split_data,
-                                                                validation_data_size= VALIDATION_DATA_SIZE,
-                                                                random_seed= random_seed,
-                                                                early_stopping_rounds= early_stopping_rounds)
-    
-    Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
-                                                                           y_pred= y_pred,
-                                                                           y_pred_proba= y_proba)
-    # print(Confusion_Matrix)
-    # print(Classification_Report)
-    # print(AUC)
-
-else:
-    print("Unrecognised model selection: %s." % model_of_selection)
-    print("Falling back to default model: %s." % DEFAULT_MODEL)
-    from dragon_fruit.machine_learning.models.XGBClassifier import get_predictions
-
-    y_pred, y_proba, Feature_Importance, model = get_predictions(Training_Data= Engineered_Data,
-                                                                Testing_Data= Enriched_Test_Data,
-                                                                Feature_Columns= Feature_Columns,
-                                                                target_col= 'is_returning_customer',
-                                                                inf_time_to_next_order= INF_TIME_TO_NEXT_ORDER,
-                                                                split_data= split_data,
-                                                                validation_data_size= VALIDATION_DATA_SIZE,
-                                                                random_seed= random_seed,
-                                                                early_stopping_rounds= early_stopping_rounds)
-    
-    Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
-                                                                           y_pred= y_pred,
-                                                                           y_pred_proba= y_proba)
+    mlflow.log_metrics({"accuracy": Classification_Report['Dict']['accuracy'],
+                        "F1 0": Classification_Report['Dict']['0']['f1-score'],
+                        "F1 1": Classification_Report['Dict']['1']['f1-score']
+                        }
+                      )
+    if AUC is not None:
+        mlflow.log_metric("AUC", AUC)
 
 
 

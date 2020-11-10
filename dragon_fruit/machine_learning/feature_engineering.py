@@ -48,7 +48,7 @@ def run_data_engineering(original_Data: pd.DataFrame,
 
     #If we don't count failed orders, then it could be a good idea to remove them for now
     if count_failed_orders == False:
-        Data = Data[Data.is_failed==1].copy()
+        Data = Data[Data.is_failed==0].copy()
         Data = Data.drop('is_failed',axis=1)
     
     return Data

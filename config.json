@@ -7,9 +7,15 @@
     "DEFAULT_MODEL" : "XGBClassifier",
     "INF_TIME_TO_NEXT_ORDER" : 20000,
     "VALIDATION_DATA_SIZE" : 0.2,
-    "COUNT_FAILED_ORDERS" : true,
+    "COUNT_FAILED_ORDERS" : false,
     
     "TRAINING_DATA_PATH" : "data/machine_learning_challenge_order_data.csv.gz",
-    "ENGINEERED_DATA_PATH" : "data/engineered_order_data.csv",
-    "TESTING_DATA_PATH" : "data/machine_learning_challenge_labeled_data.csv.gz"
+    "ENGINEERED_DATA_PATHS": {
+        "COUNT_FAILED_ON": "data/engineered_order_data_count_failed_on.csv",
+        "COUNT_FAILED_OFF": "data/engineered_order_data_count_failed_off.csv"
+    },
+    "TESTING_DATA_PATH" : "data/machine_learning_challenge_labeled_data.csv.gz",
+    "CONFUSION_MATRIX_PATH" : "artifacts/confusion_matrix.csv",
+    "CLASSIFICATION_REPORT_PATH" : "artifacts/classification_report.txt",
+    "MODEL_PICKLE_PATH" : "artifacts/model.pickle"
 }

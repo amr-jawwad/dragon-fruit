@@ -10,8 +10,8 @@ def calculate_cyclic_encoding(Column: pd.Series, range_size: int, mode: str = 's
         return np.sin(Column*(2.*np.pi/range_size))
 
 def my_train_valid_split(Data: pd.DataFrame, target_col:str, random_seed:int,
-                        validation_data_size: float = 0.2,
-                        split_data: str = 'normal', stratify:bool = False,):
+                        split_data: str, validation_data_size: float = 0.2,
+                        stratify:bool = False):
     
     if split_data == 'chronological':
         Data = Data.sort_values('order_time')
@@ -24,7 +24,7 @@ def my_train_valid_split(Data: pd.DataFrame, target_col:str, random_seed:int,
         X_valid = Data_valid.drop([target_col,'order_time'],axis=1)
         y_valid = Data_valid[target_col]
 
-    else:
+    elif split_data == 'normal':
         if stratify:
             stratify_col = Data[target_col]
         else:
@@ -35,6 +35,8 @@ def my_train_valid_split(Data: pd.DataFrame, target_col:str, random_seed:int,
                                                             test_size=validation_data_size,
                                                             stratify=stratify_col,
                                                             random_state=random_seed)
+    else:
+        raise ValueError("Unrecognised split type: %s. Options are: ['normal', 'chronological]")
 
     return (X_train, X_valid, y_train, y_valid)
         
