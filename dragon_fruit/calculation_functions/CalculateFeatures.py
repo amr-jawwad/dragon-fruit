@@ -1,6 +1,6 @@
 import pandas as pd
 
-def CalculateTimeBetweenOrders(Data: pd.DataFrame, COUNT_FAILED_ORDERS: bool):
+def calculate_time_between_orders(Data: pd.DataFrame, COUNT_FAILED_ORDERS: bool):
     #I had to also sort by customer_rank, because there were orders that were on the same day, at the same hour
     #So the only information about their true order was in the rank.
 

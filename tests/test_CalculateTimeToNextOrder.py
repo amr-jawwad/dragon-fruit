@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from calculation_functions.CalculateFeatures import CalculateTimeBetweenOrders
+from dragon_fruit.calculation_functions.CalculateFeatures import calculate_time_between_orders
 
 mock_orders_data = {'customer_id':
                     {0: 'a',
