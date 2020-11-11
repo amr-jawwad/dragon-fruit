@@ -14,7 +14,7 @@
     * [Future Work](#future-work)
 2. **Technical Description(#2-technical-description)**
     * [How to run](#how-to-run)
-    * [Code repository layout](##code-repository-layout)
+    * [Code repository layout](#code-repository-layout)
     * [Technologies used](#technologies-used-1)
     * [Future Work](#future-work-1)
 
