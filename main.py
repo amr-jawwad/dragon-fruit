@@ -104,7 +104,33 @@ with mlflow.start_run(run_name= MLFLOW_RUN_NAME):
 
     mlflow.log_params(log_dict)
 
-    if model_of_selection == 'XGBRegressor':
+    if model_of_selection == 'Baseline':
+        from dragon_fruit.machine_learning.models.Baseline import get_predictions
+        mlflow.log_param('ML_MODEL', model_of_selection)
+
+        y_pred, _, _, _ = get_predictions(Testing_Data= Enriched_Test_Data)
+
+        Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
+                                                                                 y_pred= y_pred)
+        model = None
+    
+    
+    elif model_of_selection == 'LogisticRegression':
+        from dragon_fruit.machine_learning.models.LogisticRegression import get_predictions
+        mlflow.log_param('ML_MODEL', model_of_selection)
+
+        y_pred, y_proba, Feature_Importance, model = get_predictions(Training_Data= Engineered_Data,
+                                                                    Testing_Data= Enriched_Test_Data,
+                                                                    Feature_Columns= Feature_Columns,
+                                                                    target_col= 'is_returning_customer',
+                                                                    inf_time_to_next_order= INF_TIME_TO_NEXT_ORDER,
+                                                                    random_seed= random_seed)
+        
+        Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
+                                                                            y_pred= y_pred,
+                                                                            y_pred_proba= y_proba)
+    
+    elif model_of_selection == 'XGBRegressor':
         from dragon_fruit.machine_learning.models.XGBRegressor import get_predictions
         mlflow.log_param('ML_MODEL', model_of_selection)
 
@@ -171,7 +197,8 @@ with mlflow.start_run(run_name= MLFLOW_RUN_NAME):
 
     mlflow.log_artifact(CONFUSION_MATRIX_PATH)
     mlflow.log_artifact(CLASSIFICATION_REPORT_PATH)
-    mlflow.log_artifact(MODEL_PICKLE_PATH)
+    if model is not None:
+        mlflow.log_artifact(MODEL_PICKLE_PATH)
 
     mlflow.log_metrics({"accuracy": Classification_Report['Dict']['accuracy'],
                         "F1 0": Classification_Report['Dict']['0']['f1-score'],

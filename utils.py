@@ -18,9 +18,10 @@ def save_classification_report(Classification_Report: str, FilePath: str):
         raise PermissionError("Couldn't write the file %s." % FilePath)
 
 def save_model(model, FilePath: str):
-    try:
-        with open(FilePath, 'wb') as pickle_file:
-            pickle.dump(model, pickle_file)
+    if model is not None:
+        try:
+            with open(FilePath, 'wb') as pickle_file:
+                pickle.dump(model, pickle_file)
 
-    except:
-        raise PermissionError("Couldn't write the file %s." % FilePath)
+        except:
+            raise PermissionError("Couldn't write the file %s." % FilePath)
