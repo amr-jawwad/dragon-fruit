@@ -7,7 +7,7 @@
     * [Target Variable Definition and Calculation](#target-variable-definition-and-calculation)
     * [Data Preparation and Feature Engineering](#data-preparation-and-feature-engineering)
     * [Training and Testing Strategy](#training-and-testing-strategy)
-    * [Rationales for choosing ML Models](#rationales-for-choosing-ml-models)
+    * [ML Models and the Rationales behind their Selection](##ml-models-and-the-rationales-behind-their-selection)
     * [Evaluation and Results](#evaluation-and-results)
     * [Assumptions](#assumptions)
     * [Technologies used](#technologies-used)
@@ -148,7 +148,7 @@ Now as explained in the **[Target Variable Definition](#target-variable-definiti
 6. Evaluate classification scores.
 
 #### Train-Validation Split
-We have the testing data ready for us, but I decided to also split the training data into data for training and for validation, to use **cross-validation** to choose the best parameters, and to avoid overfitting.
+We have the testing data ready for us, but I decided to also split the training data into data for training and for validation, to use **validation** to choose the best parameters, and to avoid overfitting.
 
 The data is time-dependent, so the sensible way to split the data is chronologically, meaning testing data (validation in this case), should always happen after the training data, chrnologically-speaking, to avoid leakage and not to violate the temporal property of the problem.
 
@@ -161,11 +161,21 @@ So I implemented both approaches: both *random* and *chronological* splits, with
 
 [Models' directory](./dragon_fruit/machine_learning/)
 
-## Rationales for choosing ML Models
-XGBoost was chosen for the follwing reasons:
-* Robust to outliers and long-tailed distributions, which are prevalent according to [EDA](./exploration_notebooks/01_EDA.ipynb).
-* Advantageous in the case of many features (for feature sampling in bagging)
-* Though boosting sometimes has the risk of overfitting, **cross-validation** was used to alleviate that, along with **early stopping**.
+## ML Models and the Rationales behind their Selection
+ML Models Currently implemented:
+1. Baseline
+    It is always good to have some baseline algorithm, with a basic heuristic (preferably non-ML solution) to have something to compare to.
+    In this case the baseline algorithm was simply the following:
+    If a customer had ordered more than once in the training data, they are expected to order again in the following 6 months, if they had ordered only once, then they are not.
+
+2. LogisticRegression
+    One of the simplest classifiers out there, and I always like to also examine the performance of simpler models before moving to more sophisticaed ones.
+    Because the many features introduced the risk of overfitting, I used **Cross-Validation** (5-fold) with this algorithm.
+
+3. XGBoost (Regressor and Classifier) was chosen for the follwing reasons:
+    * Robust to outliers and long-tailed distributions, which are prevalent according to [EDA](./exploration_notebooks/01_EDA.ipynb).
+    * Advantageous in the case of many features (for feature sampling in bagging)
+    * Though boosting sometimes has the risk of overfitting, **validation** was used to alleviate that, along with **early stopping**.
 
 ## Evaluation and Results
 For evaluation, I was looking at:
@@ -256,7 +266,7 @@ Metric|Value
 File paths' parameters|| not recommended to change
 random_seed| Fixed random seed for the entire project|not recommended to change
 split_data|For the train/validation split|Options: ['normal', 'chronological']
-model_of_selection|The ML model for the run|Options: ['XGBClassifier', 'XGBRegressor']
+model_of_selection|The ML model for the run|Options: ['Baseline', 'LogisticRegression', 'XGBClassifier', 'XGBRegressor']
 DEFAULT_MODEL|The ML model to fall back to if the model_of_selection wasn't recognised|Currently fixed to XGBClassifier
 |INF_TIME_TO_NEXT_ORDER|A numerical value that replaces infinity/NaT values for orders that were never followed by another order from the same customer
 VALIDATION_DATA_SIZE|As a fraction of the training data size|0 < size < 1
@@ -274,4 +284,4 @@ early_stopping_rounds|For the ML model validation
 * Implement Classes to make the project more object-oriented.
 * Make an abstract class for the ML models, and specific models implement it.
 * Use a tool to create a pipeline (e.g. luigi).
-* Implement a pathway to consume modes' pickles.
+* Implement a pathway to consume models' pickles.
