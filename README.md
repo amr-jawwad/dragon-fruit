@@ -3,8 +3,8 @@
 # Contents
 ***
 1. **[Functional Description](#1-functional-description)**
-    * Task Descripton
-    * Target Variable Definition and Calculation
+    * [Task Description](#task-description)
+    * [Target Variable Definition and Calculation](#target-variable-definition-and-calculation)
     * Data Preparation and Feature Engineering
     * Training and Testing Strategy
     * Evaluation and Results
@@ -18,7 +18,7 @@
     * Future Work
 
 # 1. Functional Description
-## Task Descripton
+## Task Description
 For the original description of the task, and the meaning of the complete list of variables, kindly check this [file](./original_README.md).
 The task is to predict whether a customer will place an order in the upcoming 6 months, given the customer id.
 
@@ -74,5 +74,41 @@ Now the time difference is assigned in each order, how long in the past the prev
 
 [Calculation Implementation](./dragon_fruit/calculation_functions/CalculateFeatures.py)
 
+## Data Preparation and Feature Engineering
+### Data Cleaning
+1. As revealed from the [EDA](./exploration_notebooks/01_EDA.ipynb),  53 records had invalid outlying order dates before the beeginning date, they were removed.
+2. There were 546 duplicates in the data, they were removed.
+
+### Feature Engineering
+1. Historical Feature
+    * Time since last order
+2. Time Features (from the order date)
+    * day of month
+    * day of week
+    * month
+    * year
+
+##### Cyclic Encoding
+Now handling time features is always tricky, we lose so much information if we encode them as categorical variables, because indeed there is some ordinality there.
+
+So to keep the ordinality information we encode them as numeric features, **BUT** there's a problem with encoding them just as they are, we lose the periodic information. For example, in hours 1 is as close to 2, as 0 is to 23!
+
+**Solution: Use cyclic encoding.**
+
+**Cyclic encoding** essentially plots the variable range on a circle, by projecting it using sine and cosine.
+
+Helpful source: http://blog.davidkaleko.com/feature-engineering-cyclical-features.html
+
+Cyclic encoding was used for all the time features except for *year*.
+
+#### Categorical Variables Encoding
+We have three variables that are categorical in nature, but that are represented as numbers. Since there is no true ordinal relationship between them, this will be misleading to the model.
+
+So One-Hot-Encoding was used for *payment_id, platform_id,* and *transmission_id.*
+The rest of the ids had too many categories, with no further information, so they were dropped.
+
+[Feature Engineering Notebook](./exploration_notebooks/02_Feature_Engineering.ipynb)
+
+[Feature Engineering Code](./dragon_fruit/machine_learning/feature_engineering.py)
 ## Assumptions
 1. 6 months = 180 days
