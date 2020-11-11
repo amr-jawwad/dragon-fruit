@@ -12,11 +12,11 @@
     * [Assumptions](#assumptions)
     * [Technologies used](#technologies-used)
     * [Future Work](#future-work)
-2. **Technical Description**
-    * How to run    
-    * Code repository layout
-    * Technologies used
-    * Future Work
+2. **Technical Description(#2-technical-description)**
+    * [How to run](#how-to-run)
+    * [Code repository layout](##code-repository-layout)
+    * [Technologies used](#technologies-used-1)
+    * [Future Work](#future-work-1)
 
 # 1. Functional Description
 ## Task Description
@@ -204,3 +204,74 @@ Metric|Value
     * More interestingly, add different class weights or class sensetivities in the training, these weights may depend on:
         * The frequency of the class in the training data, naturally, and/or
         * More interestingly, the **penalty of misclassification from the business' point of view**, i.e. is it worse to misclassify a customer that they will buy if they will eventaully not, or the other way around?
+
+# 2. Technical Description
+## How to run
+1. Make sure you're in the main directory of the repo
+2. Make sure you have the right requirements, this can be ensured using two methods:
+    a. Using pipenv (for virtual environments) (**Recommended**)
+    1. Make sure you have [pipenv installed](https://pypi.org/project/pipenv/).
+    2. Install the environment requirements using ```pipenv install```.
+    3. Log into the environment using ```pipenv shell```
+    
+    b. Alternatively, if you prefer not to use virtual environments, you can install the requirements from  _[requirements.txt](./requirements.txt)_
+    You can do that by running ```pip install -r requirements.txt```
+3. Modify the config file:
+    The config file has the settings for the run, including the file paths, ML model parameters, and all the configurations described in this document.
+4. Run using ```PYTHONPATH=. python main.py```
+5. Your run's results will be logged with MLFlow
+#### How to run tests
+1. Make sure that all the requirements are installed (from the previous section)
+2. Run ```PYTHONPATH=. py.test```
+
+**IMPORTANT NOTE**: The code checks for the existence of an already feature-engineered data file in ```data/```. to avoid running feature engineering every time, if you want to make sure that you re-run the feature engineering delete ```data/engineered_order_data*.csv```.
+
+
+## Code repository layout
+* **Main directory/**
+    * Virtual Env and requirements file
+    * '**config.json**': contains the settings for the run, check the meanings of the parameters [here](#config-file-parameters-meanings).
+    * '**main.py**': has the main logic for the run, including reading the config file, logging into MLFlow, and running the different parts of the repo.
+    * '**utils.py**': Contains some adapters to write different files into the artifacts directory.
+    * **artifacts/**
+    Contains the model pickle, and performance metrics, it's however recommended to view the results using MLFlow.
+    * **data/**
+    Contains the data files, including the input files, and an intermediate engineered data file.
+    * **dragon_fruit/**
+    Contains the main code files of the repo
+        * **calculation_functions/**
+            * **CalculateFeatures.py** Calculates the time difference features
+            * **HelperFunctions.py** Some helper functions for feature engineering and train/valid split
+        * **machine_learning/**
+            * **models/** Contains a separate py file for each ML model, containing its implementation, including splitting the data, and the training, and the predictions.
+            * **evaluation.py** For evaluating the predictions of the trained models.
+            * **feature_engineering.py** The implementation of the feature engineering.
+    * **exploration_notebooks/** Contains the exploration notebooks for EDA, feature engineering, training, testing,,, etc.
+    * **mlruns/0** The output file for MLFlow containing the runs' results
+    * **tests/** Contains tests
+
+#### Config file parameters meanings
+|Parameter|Meaning|Notes
+|---|---|---|
+File paths' parameters|| not recommended to change
+random_seed| Fixed random seed for the entire project|not recommended to change
+split_data|For the train/validation split|Options: ['normal', 'chronological']
+model_of_selection|The ML model for the run|Options: ['XGBClassifier', 'XGBRegressor']
+DEFAULT_MODEL|The ML model to fall back to if the model_of_selection wasn't recognised|Currently fixed to XGBClassifier
+|INF_TIME_TO_NEXT_ORDER|A numerical value that replaces infinity/NaT values for orders that were never followed by another order from the same customer
+VALIDATION_DATA_SIZE|As a fraction of the training data size|0 < size < 1
+COUNT_FAILED_ORDERS|Whether to count failed orders as orders (true), or to exclude them (false)|Options: [true, false]
+early_stopping_rounds|For the ML model validation
+
+## Technologies used
+* MLFlow
+* Pipenv
+* Git
+* Pytest
+* VSCode
+
+## Future Work
+* Implement Classes to make the project more object-oriented.
+* Make an abstract class for the ML models, and specific models implement it.
+* Use a tool to create a pipeline (e.g. luigi).
+* Implement a pathway to consume modes' pickles.
