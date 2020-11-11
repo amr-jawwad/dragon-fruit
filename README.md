@@ -288,3 +288,4 @@ balance_classes|Adjust class weights to account for class imbalance| Options: [t
 * Make an abstract class for the ML models, and specific models implement it.
 * Use a tool to create a pipeline (e.g. luigi).
 * Implement a pathway to consume models' pickles.
+* Proper logging tools instead of the prints
