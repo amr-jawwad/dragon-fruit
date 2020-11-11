@@ -2,7 +2,7 @@
 
 # Contents
 ***
-1. **[Functional Description](#1.-functional-description)**
+1. **[Functional Description](#1.-Functional-Description)**
     * Task Descripton
     * Target Variable Definition and Calculation
     * Data Preparation and Feature Engineering
@@ -71,7 +71,8 @@ Now the time difference is assigned in each order, how long in the past the prev
 
 **Important calculation note:** From the definition of the data (and also from my initial exploration), failed orders are not counted in the customer_order_rank. So if **COUNT_FAILED_ORDERS** is set to True then the rank will be recalculated.
 [Notebook of Target Variable Calculation](./exploration_notebooks/00_Target_Variable_Calculation.ipynb)
-[Calculation Implementation](.dragon_fruit/calculation_functions/CalculateFeatures.py)
+
+[Calculation Implementation](./dragon_fruit/calculation_functions/CalculateFeatures.py)
 
 ## Assumptions
 1. 6 months = 180 days
