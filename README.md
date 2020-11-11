@@ -2,7 +2,7 @@
 
 # Contents
 ***
-1. **[Functional Description](#1.-Functional-Description)**
+1. **[Functional Description](#1-functional-description)**
     * Task Descripton
     * Target Variable Definition and Calculation
     * Data Preparation and Feature Engineering
