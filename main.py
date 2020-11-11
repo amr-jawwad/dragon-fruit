@@ -32,6 +32,7 @@ DEFAULT_MODEL = config_dict['DEFAULT_MODEL']
 #ML Model config
 split_data = config_dict['split_data'] #options: ['normal', 'chronological']
 early_stopping_rounds = config_dict['early_stopping_rounds']
+balance_classes = config_dict['balance_classes']
 
 #ML Training Constants
 INF_TIME_TO_NEXT_ORDER = config_dict['INF_TIME_TO_NEXT_ORDER'] #This will replace NaNs in time-to-next-order for the last orders
@@ -160,7 +161,8 @@ with mlflow.start_run(run_name= MLFLOW_RUN_NAME):
                                                                     split_data= split_data,
                                                                     validation_data_size= VALIDATION_DATA_SIZE,
                                                                     random_seed= random_seed,
-                                                                    early_stopping_rounds= early_stopping_rounds)
+                                                                    early_stopping_rounds= early_stopping_rounds,
+                                                                    balance_classes= balance_classes)
         
         Confusion_Matrix, Classification_Report, AUC = classification_evaluation(y_true= Enriched_Test_Data['is_returning_customer'],
                                                                             y_pred= y_pred,

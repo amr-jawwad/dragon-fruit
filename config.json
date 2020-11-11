@@ -2,6 +2,7 @@
     "random_seed" : 42,
     "split_data" : "chronological",
     "early_stopping_rounds" : 20,
+    "balance_classes" : true,
     "model_of_selection" : "XGBClassifier",
 
     "DEFAULT_MODEL" : "XGBClassifier",

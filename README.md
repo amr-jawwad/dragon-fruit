@@ -176,6 +176,7 @@ ML Models Currently implemented:
     * Robust to outliers and long-tailed distributions, which are prevalent according to [EDA](./exploration_notebooks/01_EDA.ipynb).
     * Advantageous in the case of many features (for feature sampling in bagging)
     * Though boosting sometimes has the risk of overfitting, **validation** was used to alleviate that, along with **early stopping**.
+    * Can easily tackle **class imbalance** using class weights, which was implemented as an option
 
 ## Evaluation and Results
 For evaluation, I was looking at:
@@ -190,14 +191,15 @@ Parameter|Value
 |Split|Chronological|
 |Counting False Orders|No|
 |Split|Chronological|
+|Balancing Classes|Yes|
 
 And the results were:
 Metric|Value
 |---|---|
-|Accuracy|72.6%|
-|F1 [No orders]|0.81|
-|F1 [Orders]|0.517|
-|Area Under ROC|0.743|
+|Accuracy|76.3%|
+|F1 [No orders]|0.844|
+|F1 [Orders]|0.509|
+|Area Under ROC|0.745|
 
 ## Assumptions
 * 6 months = 180 days
@@ -209,10 +211,10 @@ Metric|Value
 ## Future Work
 * Getting classifcation probabilities even in the regression solution, by estimating confidence intervals
 * Combine both approaches of counting failed orders and not counting them, by having features representing both (e.g. rank_with_failed, rank_without_failed)
-* Tackling possible class imbalance, by:
+* Further tackling class imbalance, by:
     * Supersampling the underrepresented class or Undersampling the majority one
-    * More interestingly, add different class weights or class sensetivities in the training, these weights may depend on:
-        * The frequency of the class in the training data, naturally, and/or
+    * More interestingly, further manipulate class weights or class sensetivities in the training, these weights may depend on:
+        * The frequency of the class in the training data, naturally, and/or **[already implemented]**
         * More interestingly, the **penalty of misclassification from the business' point of view**, i.e. is it worse to misclassify a customer that they will buy if they will eventaully not, or the other way around?
 
 # 2. Technical Description
@@ -272,6 +274,7 @@ DEFAULT_MODEL|The ML model to fall back to if the model_of_selection wasn't reco
 VALIDATION_DATA_SIZE|As a fraction of the training data size|0 < size < 1
 COUNT_FAILED_ORDERS|Whether to count failed orders as orders (true), or to exclude them (false)|Options: [true, false]
 early_stopping_rounds|For the ML model validation
+balance_classes|Adjust class weights to account for class imbalance| Options: [true, false]. Implemented only to XGBClassifier for now
 
 ## Technologies used
 * MLFlow
