@@ -310,5 +310,8 @@ One example I can think of is the following:
 We want to send out promotion vouchers, but only to customers we suspect that they are **not** going to order in the upcoming period of time, to encourage them to do so.
 In that case we lose money, in a way, if we offer that voucher to someone who would have ordered anyway regardless whether they get a voucher.
 In that case for example it could be calculated by a simple risk analysis that depends on the value of the voucher, the mean value of orders by that customer, and the false positive rate, and of course, how much money we gain from converting a non-orderer to an orderer.
+But usually, business-wise, it's preferable to convert a non-orderer, even at the expense of giving a voucher to a an orderer-anyway, so in that scenario I would think that False Negatives are relatively benign.
 
 * Enriching this data with customer-specific information could enhance the performance.
+* From the fact that the performance of the models is consistently better when we do not count failed orders, I assume that the testing data does not do so, as well.
+* For other potential soliutions to some of the problems mentioned here, kindly check the [future work](#future-work) section.
