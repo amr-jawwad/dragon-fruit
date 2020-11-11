@@ -99,6 +99,7 @@ with mlflow.start_run(run_name= MLFLOW_RUN_NAME):
     del log_dict['TRAINING_DATA_PATH']
     del log_dict['ENGINEERED_DATA_PATHS']
     del log_dict['TESTING_DATA_PATH']
+    del log_dict['MODEL_PICKLE_PATH']
     del log_dict['model_of_selection']
 
     mlflow.log_params(log_dict)
