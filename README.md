@@ -12,7 +12,7 @@
     * [Assumptions](#assumptions)
     * [Technologies used](#technologies-used)
     * [Future Work](#future-work)
-2. **Technical Description(#2-technical-description)**
+2. **[Technical Description](#2-technical-description)**
     * [How to run](#how-to-run)
     * [Code repository layout](#code-repository-layout)
     * [Technologies used](#technologies-used-1)
